@@ -3,6 +3,7 @@ package com.chocksaway.p2p;
 import com.chocksaway.p2p.route.Router;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestLink {
@@ -29,6 +30,8 @@ public class TestLink {
         final String message = "this is a sample message";
 
         assertTrue(router.send(link, message));
+        assertEquals(0, node1.getMessageCount());
+        assertEquals(1, node2.getMessageCount());
 
 
 

@@ -19,6 +19,7 @@ public class Router {
     public boolean send(Link link, String message) {
         if (this.linkExists(link)) {
             link.talk(message);
+
             return true;
         }
 
