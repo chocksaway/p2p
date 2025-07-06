@@ -16,7 +16,7 @@ public record Link(Node from, Node to) {
             writer.println(message);
             System.out.printf("Message sent from %s %s to %s %s: %s%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
         } catch (IOException e) {
-            logger.error("Error sending message {}" + e.getMessage());
+            logger.error("Error sending message {}", e.getMessage());
         }
     }
 }

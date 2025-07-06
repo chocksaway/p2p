@@ -1,5 +1,8 @@
 package com.chocksaway.p2p;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,6 +14,9 @@ public final class Node {
     private final List<String> messsages;
 
     private final int port;
+
+    private static final Logger logger = LogManager.getLogger(Node.class);
+
 
     public Node(String name, int port) {
         this.name = name;
@@ -38,7 +44,7 @@ public final class Node {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error {}", e.getMessage());
             }
         }).start();
     }
