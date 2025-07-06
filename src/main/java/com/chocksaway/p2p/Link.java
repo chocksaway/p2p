@@ -1,29 +1,22 @@
 package com.chocksaway.p2p;
 
-import java.util.logging.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class Link {
-    final Node from;
-    final Node to;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-    private static final Logger logger = Logger.getLogger(Link.class.getName());
+public record Link(Node from, Node to) {
+    private static final Logger logger = LogManager.getLogger(Link.class);
 
-    public Link(Node from, Node to) {
-        this.from = from;
-        this.to = to;
-    }
-
-    public String getFrom() {
-        return this.from.name();
-    }
-
-    public String getTo() {
-        return this.to.name();
-    }
-
-    public void talk(String message) {
-        this.from.removeMessage(message);
-        this.to.addMessage(message);
-        logger.info(String.format("Transferring message from %s to %s: %s", this.from.name(), this.to.name(), message));
+    public void sendMessage(String message) {
+        try (Socket socket = new Socket(to.getName(), to.getPort());
+             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+            writer.println(message);
+            System.out.printf("Message sent from %s %s to %s %s: %s%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
+        } catch (IOException e) {
+            logger.error("Error sending message {}" + e.getMessage());
+        }
     }
 }

@@ -9,8 +9,8 @@ import static org.junit.Assert.assertTrue;
 public class TestLink {
     @Test
     public void testLinkHasAFromAndTo() {
-        var node1 = new Node("node1");
-        var node2 = new Node("node2");
+        var node1 = new Node("127.0.0.1", 8000);
+        var node2 = new Node("127.0.0.1", 8001);
 
         var link = new Link(node1, node2);
         var router = new Router(link);
@@ -20,10 +20,13 @@ public class TestLink {
 
     @Test
     public void sendMessageOnLink() {
-        var node1 = new Node("node1");
-        var node2 = new Node("node2");
+        var node1 = new Node("127.0.0.1", 8000);
+        var node2 = new Node("127.0.0.1", 8001);
 
         var link = new Link(node1, node2);
+
+        node1.startServer();
+        node2.startServer();
 
         var router = new Router(link);
 

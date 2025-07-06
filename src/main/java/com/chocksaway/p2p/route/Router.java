@@ -9,7 +9,7 @@ public class Router {
     private final List<Link> links = new ArrayList<>();
 
     public Router(Link link) {
-        if (link.getFrom() == null || link.getTo() == null) {
+        if (link.from() == null || link.to() == null) {
             throw new NullPointerException("src or destination is null");
         }
 
@@ -18,7 +18,7 @@ public class Router {
 
     public boolean send(Link link, String message) {
         if (this.linkExists(link)) {
-            link.talk(message);
+            link.sendMessage(message);
 
             return true;
         }
@@ -27,6 +27,6 @@ public class Router {
     }
 
     public boolean linkExists(Link link) {
-        return links.stream().anyMatch(each -> each.getFrom().equals(link.getFrom()) && each.getTo().equals(link.getTo()));
+        return links.stream().anyMatch(each -> each.from().equals(link.from()) && each.to().equals(link.to()));
     }
 }
