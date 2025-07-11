@@ -11,12 +11,12 @@ public record Link(Node from, Node to) {
     private static final Logger logger = LogManager.getLogger(Link.class);
 
     public void sendMessage(String message) {
-        try (Socket socket = new Socket(to.getName(), to.getPort());
+        try (Socket socket = new Socket(to.getHostname(), to.getPort());
              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
             writer.println(message);
-            System.out.printf("Message sent from %s %s to %s %s: %s%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
+            System.out.printf("Message sent from %s:%d to %s:%d: %s%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
         } catch (IOException e) {
-            logger.error("Error sending message {}", e.getMessage());
+            logger.error("Error sending message {} {}", e.getMessage(), e);
         }
     }
 }
