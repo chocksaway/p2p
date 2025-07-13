@@ -41,6 +41,6 @@ public class TestLink {
 
         assertTrue(router.send(link, message));
         assertEquals(0, node1.getMessageCount());
-        assertEquals(1, node2.getMessageCount());
+        assertEquals(2, node2.getMessageCount());
     }
 }

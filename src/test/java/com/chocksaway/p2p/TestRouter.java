@@ -16,13 +16,6 @@ public class TestRouter {
         node2.start();
         node3.start();
 
-        // Wait for servers to start
-        try {
-            Thread.sleep(2000); // Ensure servers are ready
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         var linka = new Link(node1, node2);
         var linkb = new Link(node1, node3);
         var router = new Router();
