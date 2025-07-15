@@ -24,6 +24,11 @@ public final class Node {
         this.messages = new ArrayList<>();
     }
 
+    @Override
+    public String toString() {
+        return String.format("Node{name='%s', hostname='%s', port=%d}", name, hostname, port);
+    }
+
     public String getName() {
         return name;
     }
@@ -44,7 +49,7 @@ public final class Node {
                          BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
                         String message = reader.readLine();
                         messages.add(message);
-                        System.out.printf("[%s:%d] Received: %s%n", name, port, message);
+                        logger.info("[{}:{}] Received: {}%n", name, port, message);
                     }
                 }
             } catch (IOException e) {

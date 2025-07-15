@@ -14,7 +14,7 @@ public record Link(Node from, Node to) {
         try (Socket socket = new Socket(to.getHostname(), to.getPort());
              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
             writer.println(message);
-            System.out.printf("Message sent from %s:%d to %s:%d: %s%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
+            logger.info("Message sent from {}:{} to {}:{}: {}%n", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
         } catch (IOException e) {
             logger.error("Error sending message {} {}", e.getMessage(), e);
         }
