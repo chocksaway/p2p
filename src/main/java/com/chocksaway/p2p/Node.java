@@ -3,7 +3,8 @@ package com.chocksaway.p2p;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ public final class Node {
     private final String hostname;
     private final String name;
     private final int port;
-
     private final List<String> messages;
+
     private static final Logger logger = LogManager.getLogger(Node.class);
 
     public Node(String name, int port) {
@@ -42,20 +43,36 @@ public final class Node {
     }
 
     public void start() {
-        new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(port)) {
-                while (true) {
-                    try (Socket clientSocket = serverSocket.accept();
-                         BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                        String message = reader.readLine();
-                        messages.add(message);
-                        logger.info("[{}:{}] Received: {}%n", name, port, message);
-                    }
-                }
-            } catch (IOException e) {
-                logger.error("Error {}", e.getMessage());
+        new Thread(this::runServer).start();
+    }
+
+    private void runServer() {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            while (true) {
+                handleClient(serverSocket);
             }
-        }).start();
+        } catch (IOException e) {
+            logger.error("Error starting server on port {}: {}", port, e.getMessage());
+        }
+    }
+
+    private void handleClient(ServerSocket serverSocket) {
+        try (Socket clientSocket = serverSocket.accept();
+            ObjectInputStream inputStream = new ObjectInputStream(clientSocket.getInputStream())) {
+            Object received = null;
+            try {
+                received = inputStream.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
+            }
+            if (received instanceof String message) {
+                logger.info("Message received: {}", message);
+                messages.add(message);
+                logger.info("[{}:{}] Received: {}", name, port, message);
+            }
+        } catch (IOException e) {
+            logger.error("Error handling client connection: {}", e.getMessage());
+        }
     }
 
     public int getMessageCount() {

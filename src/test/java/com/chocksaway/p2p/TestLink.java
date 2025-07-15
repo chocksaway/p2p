@@ -25,7 +25,7 @@ public class TestLink {
     }
 
     @Test
-    public void sendMessageOnLink() {
+    public void sendMessageOnLink() throws InterruptedException {
         var node1 = new Node("127.0.0.1", 8000);
         var node2 = new Node("127.0.0.1", 8001);
 
@@ -40,6 +40,9 @@ public class TestLink {
         final String message = "this is a sample message";
 
         assertTrue(router.send(link, message));
+
+        Thread.sleep(2000); // wait for messages to be sent
+
         assertEquals(0, node1.getMessageCount());
         assertEquals(2, node2.getMessageCount());
     }
