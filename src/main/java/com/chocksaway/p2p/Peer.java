@@ -35,7 +35,7 @@ public class Peer {
     }
 
     public int findNumberOfMessages(String nodeName) {
-        int messageCount = this.nodes.stream().filter(each -> each.getName().equals(nodeName)).findFirst().get().getMessageCount();
-        return messageCount;
+        var node = this.nodes.stream().filter(each -> each.getName().equals(nodeName)).findFirst();
+        return node.map(Node::getMessageCount).orElse(0);
     }
 }
