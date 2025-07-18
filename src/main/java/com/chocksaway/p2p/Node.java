@@ -12,7 +12,7 @@ import java.util.List;
 
 public final class Node {
     private final String hostname;
-    private final String name;
+    private String name;
     private final int port;
     private final List<String> messages;
 
@@ -66,7 +66,6 @@ public final class Node {
                 logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
             }
             if (received instanceof String message) {
-                logger.info("Message received: {}", message);
                 messages.add(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
             }
@@ -77,5 +76,9 @@ public final class Node {
 
     public int getMessageCount() {
         return messages.size();
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

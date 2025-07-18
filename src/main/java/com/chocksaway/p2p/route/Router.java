@@ -18,7 +18,7 @@ public class Router {
         links.add(link);
 
         logger.info("Add link: {}", link);
-        send(link, "link added" + link);
+        //send(link, "link added" + link);
     }
 
     public boolean send(Link link, String message) {
@@ -31,7 +31,10 @@ public class Router {
 
     public boolean linkExists(Link link) {
         return links.stream()
-                .anyMatch(each -> each.from().getName().equals(link.from().getName()) &&
-                        each.to().getName().equals(link.to().getName()));
+                .anyMatch(
+                        each ->
+                                each.from().getName().equals(link.from().getName()) &&
+                                    each.to().getName().equals(link.to().getName())
+                );
     }
 }
