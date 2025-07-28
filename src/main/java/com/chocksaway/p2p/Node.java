@@ -2,6 +2,8 @@ package com.chocksaway.p2p;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,6 +18,8 @@ public final class Node {
     private final int port;
     private final List<String> messages;
 
+    private final Sinks.Many<String> messageSink = Sinks.many().multicast().onBackpressureBuffer();
+
     private static final Logger logger = LogManager.getLogger(Node.class);
 
     public Node(String name, int port) {
@@ -23,6 +27,15 @@ public final class Node {
         this.name = name;
         this.port = port;
         this.messages = new ArrayList<>();
+    }
+
+    private void addMessage(String message) {
+        messages.add(message);
+        messageSink.tryEmitNext(message);
+    }
+
+    public Flux<String> getMessageFlux() {
+        return messageSink.asFlux();
     }
 
     @Override
@@ -66,7 +79,7 @@ public final class Node {
                 logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
             }
             if (received instanceof String message) {
-                messages.add(message);
+                addMessage(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
             }
         } catch (IOException e) {
