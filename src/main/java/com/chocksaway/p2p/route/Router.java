@@ -19,18 +19,23 @@ public class Router {
             throw new LinkExistsException(link + " already exists");
         }
         links.add(link);
+        send(link);
 
         logger.info("Add link: {}", link);
+    }
+
+    public void send(Link link) {
+        link.sendMessage(link);
     }
 
     public boolean send(Link link, String message) {
         if (linkExists(link)) {
             link.sendMessage(message);
-            if (true) { //todo: add a config option to control this
-                links.stream()
-                        .filter(each -> each != link)
-                        .forEach(each -> each.sendMessage(message));
-            }
+//            if (true) { //todo: add a config option to control this
+//                links.stream()
+//                        .filter(each -> each != link)
+//                        .forEach(each -> each.sendMessage(message));
+//            }
             return true;
         }
         return false;

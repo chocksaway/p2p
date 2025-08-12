@@ -7,18 +7,22 @@ import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public final class Node {
+public final class Node implements Serializable {
     private final String hostname;
     private String name;
     private final int port;
     private final List<String> messages;
+    private final List<Link> links;
 
-    private final Sinks.Many<String> messageSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final transient Sinks.Many<String> messageSink = Sinks.many().multicast().onBackpressureBuffer();
 
     private static final Logger logger = LogManager.getLogger(Node.class);
 
@@ -27,6 +31,7 @@ public final class Node {
         this.name = name;
         this.port = port;
         this.messages = new ArrayList<>();
+        this.links = new ArrayList<>();
     }
 
     private void addMessage(String message) {
@@ -81,6 +86,23 @@ public final class Node {
             if (received instanceof String message) {
                 addMessage(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
+            } else if (received instanceof Link link) {
+                links.add(link);
+                logger.info("[{}:{}] Received link: {}", name, port, link);
+
+                if (!Objects.equals(link.to().name, name)) {
+                    // Forward the link to the next node
+                    try (Socket socket = new Socket(link.to().getHostname(), link.to().getPort());
+                         ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
+                        outputStream.writeObject(link);
+                        logger.info("[{}:{}] Forwarded link to {}:{}", name, port, link.to().getName(), link.to().getPort());
+                    } catch (IOException e) {
+                        logger.error("Error forwarding link to {}: {}", link.to().getName(), e.getMessage());
+                    }
+
+                }
+            } else {
+                logger.warn("[{}:{}] Received unknown object type: {}", name, port, received.getClass().getName());
             }
         } catch (IOException e) {
             logger.error("Error handling client connection: {}", e.getMessage());
@@ -93,5 +115,9 @@ public final class Node {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getLinks() {
+        return this.links.size();
     }
 }

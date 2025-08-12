@@ -5,10 +5,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 import java.util.Objects;
 
-public final class Link {
+public final class Link implements Serializable {
     private static final Logger logger = LogManager.getLogger(Link.class);
     private final Node from;
     private final Node to;
