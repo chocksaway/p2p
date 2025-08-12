@@ -7,7 +7,6 @@ import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -91,15 +90,8 @@ public final class Node implements Serializable {
                 logger.info("[{}:{}] Received link: {}", name, port, link);
 
                 if (!Objects.equals(link.to().name, name)) {
-                    // Forward the link to the next node
-                    try (Socket socket = new Socket(link.to().getHostname(), link.to().getPort());
-                         ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
-                        outputStream.writeObject(link);
-                        logger.info("[{}:{}] Forwarded link to {}:{}", name, port, link.to().getName(), link.to().getPort());
-                    } catch (IOException e) {
-                        logger.error("Error forwarding link to {}: {}", link.to().getName(), e.getMessage());
-                    }
-
+                    logger.info("Forwarding link from {} to {}", name, link.to().name);
+                    link.sendMessage(link);
                 }
             } else {
                 logger.warn("[{}:{}] Received unknown object type: {}", name, port, received.getClass().getName());
