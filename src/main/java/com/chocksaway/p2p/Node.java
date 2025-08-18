@@ -1,5 +1,6 @@
 package com.chocksaway.p2p;
 
+import com.chocksaway.p2p.route.Router;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -20,6 +21,9 @@ public final class Node implements Serializable {
     private final int port;
     private final List<String> messages;
     private final List<Link> links;
+    private Router router;
+
+    private volatile boolean running = false;
 
     private final transient Sinks.Many<String> messageSink = Sinks.many().multicast().onBackpressureBuffer();
 
@@ -31,6 +35,7 @@ public final class Node implements Serializable {
         this.port = port;
         this.messages = new ArrayList<>();
         this.links = new ArrayList<>();
+        this.router = null;
     }
 
     private void addMessage(String message) {
@@ -60,11 +65,13 @@ public final class Node implements Serializable {
     }
 
     public void start() {
+        logger.info("Starting: {}", this.name);
         new Thread(this::runServer).start();
     }
 
     private void runServer() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            running = true;
             while (true) {
                 handleClient(serverSocket);
             }
@@ -111,5 +118,21 @@ public final class Node implements Serializable {
 
     public int getLinks() {
         return this.links.size();
+    }
+
+    public void addRouter(Router router) {
+        this.router = router;
+    }
+
+    public Router getRouter() {
+        return this.router;
+    }
+
+    public int findNumberOfMessages(String name) {
+        return this.messages.size();
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }

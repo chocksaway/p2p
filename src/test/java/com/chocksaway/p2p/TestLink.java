@@ -1,5 +1,6 @@
 package com.chocksaway.p2p;
 
+import com.chocksaway.p2p.route.Router;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,10 +14,11 @@ public class TestLink {
 
         var link = new Link(src, dest);
 
-        var peer = new Peer("peer");
-        peer.addLink(link);
+        var router = new Router();
+        router.addLink(link);
+        src.addRouter(router);
 
-        assertTrue(peer.getRouter().linkExists(link));
+        assertTrue(src.getRouter().linkExists(link));
     }
 
     @Test
@@ -25,21 +27,22 @@ public class TestLink {
         var node2 = new Node("node2", 8001);
         var link = new Link(node1, node2);
 
-        var peer1 = new Peer("peer1");
-        var peer2 = new Peer("peer2");
+        var router = new Router();
+        router.addLink(link);
+        node1.addRouter(router);
 
-        peer1.start(node1);
-        peer2.start(node2);
-
-        peer1.addLink(link);
+        node1.start();
+        node2.start();
 
         final String message = "this is a sample message";
 
-        assertTrue(peer1.send(link, message));
+
+
+        assertTrue(router.send(link, message));
 
         Thread.sleep(2000); // wait for messages to be sent
 
         // explicit call to getName which includes the peer name
-        assertEquals(1, peer2.findNumberOfMessages(node2.getName()));
+        assertEquals(1, node2.findNumberOfMessages(node2.getName()));
     }
 }
