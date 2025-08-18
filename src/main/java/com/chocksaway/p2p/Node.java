@@ -20,8 +20,7 @@ public final class Node implements Serializable {
     private String name;
     private final int port;
     private final List<String> messages;
-    private final List<Link> links;
-    private Router router;
+    private transient Router router;
 
     private volatile boolean running = false;
 
@@ -34,7 +33,6 @@ public final class Node implements Serializable {
         this.name = name;
         this.port = port;
         this.messages = new ArrayList<>();
-        this.links = new ArrayList<>();
         this.router = null;
     }
 
@@ -93,9 +91,6 @@ public final class Node implements Serializable {
                 addMessage(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
             } else if (received instanceof Link link) {
-                links.add(link);
-                logger.info("[{}:{}] Received link: {}", name, port, link);
-
                 if (!Objects.equals(link.to().name, name)) {
                     logger.info("Forwarding link from {} to {}", name, link.to().name);
                     link.sendMessage(link);
@@ -117,7 +112,7 @@ public final class Node implements Serializable {
     }
 
     public int getLinks() {
-        return this.links.size();
+        return this.router.getLinks();
     }
 
     public void addRouter(Router router) {
@@ -134,5 +129,30 @@ public final class Node implements Serializable {
 
     public boolean isRunning() {
         return running;
+    }
+
+    public void stop() {
+        logger.info("Stopping: {}", this.name);
+        messages.clear();
+        try {
+            // Close the server socket if it was opened
+            new ServerSocket(port).close();
+        } catch (IOException e) {
+            logger.error("Error closing server socket on port {}: {}", port, e.getMessage());
+        }
+    }
+
+    public void addLink(Link link) {
+        if (this.router == null) {
+            this.router = new Router();
+        }
+        this.router.addLink(link);
+    }
+
+    public boolean send(Link link, String message) {
+        if (this.router == null) {
+            this.router = new Router();
+        }
+        return this.router.send(link, message);
     }
 }

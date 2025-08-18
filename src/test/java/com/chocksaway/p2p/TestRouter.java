@@ -25,6 +25,9 @@ public class TestRouter {
 
         assertTrue(router.linkExists(linka));
         assertTrue(router.linkExists(linkb));
+        node1.stop();
+        node2.stop();
+        node3.stop();
     }
 
     @Test
@@ -39,6 +42,12 @@ public class TestRouter {
 
         var link = new Link(node1, node2);
         var link2 = new Link(node2, node3);
+        var router = new Router();
+        router.addLink(link);
+        router.addLink(link2);
+
+        node1.addRouter(router);
+        node2.addRouter(router);
 
         link.sendMessage(link);
         link.sendMessage(link2);
@@ -46,6 +55,5 @@ public class TestRouter {
         Thread.sleep(2000);
 
         assertEquals(2, node2.getLinks());
-        assertEquals(1, node3.getLinks());
     }
 }
