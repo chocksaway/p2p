@@ -17,7 +17,7 @@ import java.util.List;
 
 public final class Node implements Serializable {
     private final String hostname;
-    private String name;
+    private final String name;
     private final int port;
     private final List<String> messages;
     private transient Router router;
@@ -94,6 +94,7 @@ public final class Node implements Serializable {
             } else if (received instanceof SimpleMessage simpleMessage) {
                 if (simpleMessage.getDestination().equals(this.name)) {
                     logger.info("[{}:{}] Received message for self: {}", name, port, simpleMessage.getMessage());
+                    addMessage(simpleMessage.getMessage());
                 } else {
                     logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
                     router.send(simpleMessage);
@@ -108,14 +109,6 @@ public final class Node implements Serializable {
 
     public int getLinks() {
         return this.router.getLinks();
-    }
-
-    public void setLinks(List<Link> links) {
-        links.forEach(link -> router.addLink(link));
-    }
-
-    public int findNumberOfMessages() {
-        return this.messages.size();
     }
 
     public boolean isRunning() {
@@ -142,5 +135,9 @@ public final class Node implements Serializable {
 
     public Router getRouter() {
         return this.router;
+    }
+
+    public int getMessages() {
+        return this.messages.size();
     }
 }

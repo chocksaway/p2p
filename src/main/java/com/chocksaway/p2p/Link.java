@@ -21,7 +21,7 @@ public final class Link implements Serializable {
 
     public void overlay() {
         this.from.getRouter().addLink(this);
-        this.to.getRouter().addLink(this);
+        //this.to.getRouter().addLink(this);
     }
 
     public void sendMessage(Object message) {
