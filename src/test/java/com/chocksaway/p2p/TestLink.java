@@ -3,27 +3,28 @@ package com.chocksaway.p2p;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class TestLink {
     @Test
-    public void sendMessageOnLink() throws InterruptedException {
-        var node1 = new Node("node1", 8000);
-        var node2 = new Node("node2", 8001);
-        var link = new Link(node1, node2);
+    public void testLinkOverlay() {
+        var node1 = new Node("node1", 8001);
+        var node2 = new Node("node2", 8002);
+        var node3 = new Node("node3", 8003);
+        var node4 = new Node("node4", 8004);
 
-        node1.start();
-        node2.start();
+        var link12 = new Link(node1, node2);
+        var link13 = new Link(node1, node3);
+        var link24 = new Link(node2, node4);
+        var link34 = new Link(node3, node4);
 
-        node1.addLink(link);
+        link12.overlay();
+        link13.overlay();
+        link24.overlay();
+        link34.overlay();
 
-        final String message = "this is a sample message";
-
-        assertTrue(node1.send(link, message));
-
-        Thread.sleep(2000); // wait for messages to be sent
-
-        // explicit call to getName which includes the peer name
-        assertEquals(1, node2.findNumberOfMessages(node2.getName()));
+        assertEquals(2, node1.getLinks());
+        assertEquals(2, node2.getLinks());
+        assertEquals(2, node3.getLinks());
+        assertEquals(2, node4.getLinks());
     }
 }

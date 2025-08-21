@@ -19,6 +19,11 @@ public final class Link implements Serializable {
         this.to = to;
     }
 
+    public void overlay() {
+        this.from.getRouter().addLink(this);
+        this.to.getRouter().addLink(this);
+    }
+
     public void sendMessage(Object message) {
         try (Socket socket = new Socket(to.getHostname(), to.getPort());
              ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
