@@ -1,5 +1,6 @@
 package com.chocksaway.p2p;
 
+import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.Router;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +14,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class Node implements Serializable {
     private final String hostname;
@@ -33,7 +33,7 @@ public final class Node implements Serializable {
         this.name = name;
         this.port = port;
         this.messages = new ArrayList<>();
-        this.router = null;
+        this.router = new Router(this.name);
     }
 
     private void addMessage(String message) {
@@ -84,16 +84,19 @@ public final class Node implements Serializable {
             Object received = null;
             try {
                 received = inputStream.readObject();
+                logger.info("Received: {}", received);
             } catch (IOException | ClassNotFoundException e) {
                 logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
             }
             if (received instanceof String message) {
                 addMessage(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
-            } else if (received instanceof Link link) {
-                if (!Objects.equals(link.to().name, name)) {
-                    logger.info("Forwarding link from {} to {}", name, link.to().name);
-                    link.sendMessage(link);
+            } else if (received instanceof SimpleMessage simpleMessage) {
+                if (simpleMessage.getDestination().equals(this.name)) {
+                    logger.info("[{}:{}] Received message for self: {}", name, port, simpleMessage.getMessage());
+                } else {
+                    logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
+                    router.send(simpleMessage);
                 }
             } else {
                 logger.warn("[{}:{}] Received unknown object type: {}", name, port, received.getClass().getName());
@@ -103,27 +106,15 @@ public final class Node implements Serializable {
         }
     }
 
-    public int getMessageCount() {
-        return messages.size();
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public int getLinks() {
         return this.router.getLinks();
     }
 
-    public void addRouter(Router router) {
-        this.router = router;
+    public void setLinks(List<Link> links) {
+        links.forEach(link -> router.addLink(link));
     }
 
-    public Router getRouter() {
-        return this.router;
-    }
-
-    public int findNumberOfMessages(String name) {
+    public int findNumberOfMessages() {
         return this.messages.size();
     }
 
@@ -142,17 +133,14 @@ public final class Node implements Serializable {
         }
     }
 
-    public void addLink(Link link) {
+    public boolean send(SimpleMessage message) {
         if (this.router == null) {
-            this.router = new Router();
+            this.router = new Router(this.name);
         }
-        this.router.addLink(link);
+        return this.router.send(message);
     }
 
-    public boolean send(Link link, String message) {
-        if (this.router == null) {
-            this.router = new Router();
-        }
-        return this.router.send(link, message);
+    public Router getRouter() {
+        return this.router;
     }
 }
