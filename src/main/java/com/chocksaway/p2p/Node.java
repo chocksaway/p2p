@@ -93,10 +93,11 @@ public final class Node implements Serializable {
                 logger.info("[{}:{}] Received: {}", name, port, message);
             } else if (received instanceof SimpleMessage simpleMessage) {
                 if (simpleMessage.getDestination().equals(this.name)) {
-                    logger.info("[{}:{}] Received message for self: {}", name, port, simpleMessage.getMessage());
+                    logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
                     addMessage(simpleMessage.getMessage());
                 } else {
                     logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
+                    simpleMessage.addToPath(this.name);
                     router.send(simpleMessage);
                 }
             } else {
