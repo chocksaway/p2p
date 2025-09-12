@@ -17,14 +17,14 @@ public class TestLink {
         var link24 = new Link(node2, node4);
         var link34 = new Link(node3, node4);
 
-        link12.overlay();
-        link13.overlay();
-        link24.overlay();
-        link34.overlay();
+        link12.addToFromRouter();
+        link13.addToFromRouter();
+        link24.addToFromRouter();
+        link34.addToFromRouter();
 
         assertEquals(2, node1.getLinks());
-        assertEquals(2, node2.getLinks());
-        assertEquals(2, node3.getLinks());
-        assertEquals(2, node4.getLinks());
+        assertEquals(1, node2.getLinks());
+        assertEquals(1, node3.getLinks());
+        assertEquals(0, node4.getLinks());
     }
 }

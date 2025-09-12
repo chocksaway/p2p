@@ -27,11 +27,11 @@ public class TestSimpleMessageSendAndAckResponse {
         var link34 = new Link(node3, node5);
         var link54 = new Link(node5, node4);
 
-        link12.overlay();
-        link13.overlay();
-        link24.overlay();
-        link34.overlay();
-        link54.overlay();
+        link12.addToFromRouter();
+        link13.addToFromRouter();
+        link24.addToFromRouter();
+        link34.addToFromRouter();
+        link54.addToFromRouter();
 
         var message = "Hello, Node 4!";
         var simpleMessage = new SimpleMessage("node4", message);

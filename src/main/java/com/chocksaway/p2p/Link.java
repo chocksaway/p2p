@@ -19,7 +19,7 @@ public final class Link implements Serializable {
         this.to = to;
     }
 
-    public void overlay() {
+    public void addToFromRouter() {
         this.from.getRouter().addLink(this);
     }
 
