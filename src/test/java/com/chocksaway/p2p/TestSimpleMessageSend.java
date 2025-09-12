@@ -1,13 +1,14 @@
 package com.chocksaway.p2p;
 
 import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.route.BaseNode;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class TestSimpleMessageSend {
     @Test
-    public void testSend() throws InterruptedException {
+    public void testSendAndReturnAckMessage() throws InterruptedException {
         var node1 = new Node("node1", 8011);
         var node2 = new Node("node2", 8012);
         var node3 = new Node("node3", 8013);
@@ -34,11 +35,12 @@ public class TestSimpleMessageSend {
 
         var message = "Hello, Node 4!";
         var simpleMessage = new SimpleMessage("node4", message);
-        simpleMessage.addToPath("node1");
+        simpleMessage.addToPath(new BaseNode(node1.getName(), node1.getName(), node1.getPort()));
         node1.send(simpleMessage);
 
         Thread.sleep(2000);
 
         assertEquals(2, node4.getMessages());
+        assertEquals(2, node1.getAckMessages());
     }
 }

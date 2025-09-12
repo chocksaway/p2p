@@ -21,14 +21,13 @@ public final class Link implements Serializable {
 
     public void overlay() {
         this.from.getRouter().addLink(this);
-        //this.to.getRouter().addLink(this);
     }
 
     public void sendMessage(Object message) {
         try (Socket socket = new Socket(to.getHostname(), to.getPort());
              ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream())) {
             outputStream.writeObject(message);
-            logger.info("Message sent from {}:{} to {}:{}: {}", from.getName(), from.getPort(), to.getName(), to.getPort(), message);
+            logger.info("Message {} sent from {}:{} to {}:{}: {}", message.getClass(), from.getName(), from.getPort(), to.getName(), to.getPort(), message);
         } catch (IOException e) {
             logger.error("Error sending message {} {}", e.getMessage(), e);
         }

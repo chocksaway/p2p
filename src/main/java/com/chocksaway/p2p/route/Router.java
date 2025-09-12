@@ -1,6 +1,7 @@
 package com.chocksaway.p2p.route;
 
 import com.chocksaway.p2p.Link;
+import com.chocksaway.p2p.message.AckMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,6 +30,44 @@ public class Router  {
             link.sendMessage(message);
         }
         return false;
+    }
+
+    public boolean send(AckMessage message) {
+        if (!findLinkInPath(message)) {
+            var destination = links.stream()
+                    .filter(link -> message.getDestination().getName().equals(link.to().getName()))
+                    .findFirst();
+
+            if (destination.isPresent()) {
+                destination.get().sendMessage(message);
+                return true;
+            }
+
+            var link = message.getLink();
+            link.sendMessage(message);
+        }
+
+        return true;
+    }
+
+    private boolean findLinkInPath(AckMessage message) {
+        return message.getPath().stream()
+                .filter(each -> each.getName().equals(this.name))
+                .findFirst()
+                .map(node -> {
+                    var index = message.getPath().indexOf(node);
+                    if (index > 0) {
+                        var from = message.getPath().get(index - 1);
+                        var to = message.getPath().get(index);
+                        message.buildLink(from, to);
+                        message.getLink().sendMessage(message);
+                    }
+                    return true;
+                })
+                .orElseGet(() -> {
+                    logger.warn("Node {} not in path {}", this.name, message.getPath());
+                    return false;
+                });
     }
 
     public int getLinks() {

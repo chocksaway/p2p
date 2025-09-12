@@ -1,6 +1,8 @@
 package com.chocksaway.p2p;
 
+import com.chocksaway.p2p.message.AckMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.route.BaseNode;
 import com.chocksaway.p2p.route.Router;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +21,9 @@ public final class Node implements Serializable {
     private final String hostname;
     private final String name;
     private final int port;
+    private final BaseNode baseNode;
     private final List<String> messages;
+    private final List<String> ackMessages = new ArrayList<>();
     private transient Router router;
 
     private volatile boolean running = false;
@@ -32,6 +36,7 @@ public final class Node implements Serializable {
         this.hostname = "127.0.0.1";
         this.name = name;
         this.port = port;
+        this.baseNode = new BaseNode(this.hostname, this.name, this.port);
         this.messages = new ArrayList<>();
         this.router = new Router(this.name);
     }
@@ -84,20 +89,34 @@ public final class Node implements Serializable {
             Object received = null;
             try {
                 received = inputStream.readObject();
-                logger.info("Received: {}", received);
             } catch (IOException | ClassNotFoundException e) {
                 logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
             }
             if (received instanceof String message) {
                 addMessage(message);
                 logger.info("[{}:{}] Received: {}", name, port, message);
+            } else if (received instanceof AckMessage ackMessage) {
+                logger.info("[{}:{}] Received ack message: {}", name, port, ackMessage.getMessage());
+
+                if (ackMessage.getDestination().getName().equals(this.name)) {
+                    logger.info("[{}:{}] Ack is for self: {}", name, port, ackMessage.getMessage());
+                    this.ackMessages.add(ackMessage.getMessage());
+                } else {
+                    logger.info("[{}:{}] Forwarding ack to: {}", name, port, ackMessage.getDestination());
+                    router.send(ackMessage);
+                }
+
             } else if (received instanceof SimpleMessage simpleMessage) {
                 if (simpleMessage.getDestination().equals(this.name)) {
                     logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
                     addMessage(simpleMessage.getMessage());
+                    // Send an acknowledgment back to the sender
+                    var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath());
+                    ackMessage.buildLink(simpleMessage.getPath().getLast(), this.baseNode);
+                    router.send(ackMessage);
                 } else {
                     logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
-                    simpleMessage.addToPath(this.name);
+                    simpleMessage.addToPath(this.baseNode);
                     router.send(simpleMessage);
                 }
             } else {
@@ -106,6 +125,10 @@ public final class Node implements Serializable {
         } catch (IOException e) {
             logger.error("Error handling client connection: {}", e.getMessage());
         }
+    }
+
+    public int getAckMessages() {
+        return this.ackMessages.size();
     }
 
     public int getLinks() {
@@ -140,5 +163,9 @@ public final class Node implements Serializable {
 
     public int getMessages() {
         return this.messages.size();
+    }
+
+    public BaseNode getBaseNode() {
+        return this.baseNode;
     }
 }
