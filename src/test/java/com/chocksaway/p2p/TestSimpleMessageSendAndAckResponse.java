@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class TestSimpleMessageSend {
+public class TestSimpleMessageSendAndAckResponse {
     @Test
     public void testSendAndReturnAckMessage() throws InterruptedException {
         var node1 = new Node("node1", 8011);
