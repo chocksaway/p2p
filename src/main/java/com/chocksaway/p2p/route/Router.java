@@ -25,14 +25,13 @@ public class Router  {
         links.add(link);
     }
 
-    public boolean send(SimpleMessage message) {
+    public void send(SimpleMessage message) {
         for (Link link : links) {
             link.sendMessage(message);
         }
-        return false;
     }
 
-    public boolean send(AckMessage message) {
+    public void send(AckMessage message) {
         if (!findLinkInPath(message)) {
             var destination = links.stream()
                     .filter(link -> message.getDestination().getName().equals(link.to().getName()))
@@ -40,14 +39,11 @@ public class Router  {
 
             if (destination.isPresent()) {
                 destination.get().sendMessage(message);
-                return true;
             }
 
             var link = message.getLink();
             link.sendMessage(message);
         }
-
-        return true;
     }
 
     private boolean findLinkInPath(AckMessage message) {

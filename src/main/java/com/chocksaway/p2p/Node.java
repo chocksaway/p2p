@@ -150,11 +150,11 @@ public final class Node implements Serializable {
         }
     }
 
-    public boolean send(SimpleMessage message) {
+    public void send(SimpleMessage message) {
         if (this.router == null) {
             this.router = new Router(this.name);
         }
-        return this.router.send(message);
+        this.router.send(message);
     }
 
     public Router getRouter() {
