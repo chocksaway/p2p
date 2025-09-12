@@ -92,40 +92,54 @@ public final class Node implements Serializable {
             } catch (IOException | ClassNotFoundException e) {
                 logger.error("Error receiving data from server on port {}: {}", port, e.getMessage());
             }
-            if (received instanceof String message) {
-                addMessage(message);
-                logger.info("[{}:{}] Received: {}", name, port, message);
-            } else if (received instanceof AckMessage ackMessage) {
-                logger.info("[{}:{}] Received ack message: {}", name, port, ackMessage.getMessage());
 
-                if (ackMessage.getDestination().getName().equals(this.name)) {
-                    logger.info("[{}:{}] Ack is for self: {}", name, port, ackMessage.getMessage());
-                    this.ackMessages.add(ackMessage.getMessage());
-                } else {
-                    logger.info("[{}:{}] Forwarding ack to: {}", name, port, ackMessage.getDestination());
-                    router.send(ackMessage);
-                }
-
-            } else if (received instanceof SimpleMessage simpleMessage) {
-                if (simpleMessage.getDestination().equals(this.name)) {
-                    logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
-                    addMessage(simpleMessage.getMessage());
-                    // Send an acknowledgment back to the sender
-                    var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath());
-                    ackMessage.buildLink(simpleMessage.getPath().getLast(), this.baseNode);
-                    router.send(ackMessage);
-                } else {
-                    logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
-                    simpleMessage.addToPath(this.baseNode);
-                    router.send(simpleMessage);
-                }
-            } else {
-                logger.warn("[{}:{}] Received unknown object type: {}", name, port, received.getClass().getName());
+            switch (received) {
+                case String message -> process(message);
+                case SimpleMessage simpleMessage -> process(simpleMessage);
+                case AckMessage ackMessage -> process(ackMessage);
+                case null -> logger.warn("[{}:{}] Received null object", name, port);
+                default ->
+                        logger.warn("[{}:{}] Received unknown object type: {}", name, port, received.getClass().getName());
             }
         } catch (IOException e) {
             logger.error("Error handling client connection: {}", e.getMessage());
         }
     }
+
+
+    private void process(String message) {
+        addMessage(message);
+        logger.info("[{}:{}] Received: {}", name, port, message);
+    }
+
+    private void process(SimpleMessage simpleMessage) {
+        if (simpleMessage.getDestination().equals(this.name)) {
+            logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
+            addMessage(simpleMessage.getMessage());
+            // Send an acknowledgment back to the sender
+            var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath());
+            ackMessage.buildLink(simpleMessage.getPath().getLast(), this.baseNode);
+            router.send(ackMessage);
+        } else {
+            logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
+            simpleMessage.addToPath(this.baseNode);
+            router.send(simpleMessage);
+        }
+    }
+
+    private void process(AckMessage ackMessage) {
+        logger.info("[{}:{}] Received ack message: {}", name, port, ackMessage.getMessage());
+
+        if (ackMessage.getDestination().getName().equals(this.name)) {
+            logger.info("[{}:{}] Ack is for self: {}", name, port, ackMessage.getMessage());
+            this.ackMessages.add(ackMessage.getMessage());
+        } else {
+            logger.info("[{}:{}] Forwarding ack to: {}", name, port, ackMessage.getDestination());
+            router.send(ackMessage);
+        }
+    }
+
+
 
     public int getAckMessages() {
         return this.ackMessages.size();

@@ -1,6 +1,7 @@
 # P2P Node Project
 
-A simple peer-to-peer (P2P) messaging system in Java using Maven. Nodes can send and receive serializable messages over sockets.
+A peer-to-peer (P2P) messaging system in Java using Maven. Nodes can send and receive serializable messages over sockets.
+Ack messages are sent back to the sender after delivery of a message.
 
 ## Features
 
@@ -17,6 +18,6 @@ A simple peer-to-peer (P2P) messaging system in Java using Maven. Nodes can send
 Unit tests
 
 A network is constructed with nodes, and links.
-Messages are sent between nodes, and the receipt of messages is verified.
+Messages are sent between nodes, and the receipt (ack) of messages is verified.
 
 
