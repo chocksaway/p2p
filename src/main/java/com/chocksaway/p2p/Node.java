@@ -117,7 +117,7 @@ public final class Node implements Serializable {
             logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
             addMessage(simpleMessage.getMessage());
             // Send an acknowledgment back to the sender
-            var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath());
+            var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath(), this.getBaseNode());
             ackMessage.buildLink(simpleMessage.getPath().getLast(), this.baseNode);
             router.send(ackMessage);
         } else {
@@ -133,6 +133,7 @@ public final class Node implements Serializable {
         if (ackMessage.getDestination().getName().equals(this.name)) {
             logger.info("[{}:{}] Ack is for self: {}", name, port, ackMessage.getMessage());
             this.ackMessages.add(ackMessage.getMessage());
+            this.router.storePath(ackMessage.getPath(), ackMessage.getSource());
         } else {
             logger.info("[{}:{}] Forwarding ack to: {}", name, port, ackMessage.getDestination());
             router.send(ackMessage);
@@ -181,5 +182,9 @@ public final class Node implements Serializable {
 
     public BaseNode getBaseNode() {
         return this.baseNode;
+    }
+
+    public List<List<BaseNode>> getPath(String destination) {
+        return this.router.getPaths().get(destination);
     }
 }

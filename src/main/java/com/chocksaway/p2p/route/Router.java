@@ -6,16 +6,22 @@ import com.chocksaway.p2p.message.SimpleMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class Router  {
     private final String name;
     private final List<Link> links = new ArrayList<>();
+
+    private final Map<String, List<List<BaseNode>>> paths;
+
+
+
     private static final Logger logger = LogManager.getLogger(Router.class);
 
     public Router(String name) {
         this.name = name;
+        this.paths = new HashMap<>();
     }
 
     public void addLink(Link link) {
@@ -37,9 +43,7 @@ public class Router  {
                     .filter(link -> message.getDestination().getName().equals(link.to().getName()))
                     .findFirst();
 
-            if (destination.isPresent()) {
-                destination.get().sendMessage(message);
-            }
+            destination.ifPresent(link -> link.sendMessage(message));
 
             var link = message.getLink();
             link.sendMessage(message);
@@ -68,5 +72,21 @@ public class Router  {
 
     public int getLinks() {
         return this.links.size();
+    }
+
+    public void storePath(List<BaseNode> path, BaseNode source) {
+        var pathsFromSource = this.paths.get(source.getName());
+        if (pathsFromSource != null) {
+
+            pathsFromSource.add(path);
+        } else {
+
+            this.paths.put(source.getName(), new ArrayList<>(List.of(path)));
+        }
+
+    }
+
+    public Map<String, List<List<BaseNode>>> getPaths() {
+        return this.paths;
     }
 }

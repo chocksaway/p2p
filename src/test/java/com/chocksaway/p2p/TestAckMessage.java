@@ -11,7 +11,7 @@ public class TestAckMessage {
     public void testAckMessage() {
         var node1 = new Node("node1", 8011);
         var node2 = new Node("node2", 8012);
-        var ackMessage = new AckMessage(node1.getBaseNode(), "ack message", null);
+        var ackMessage = new AckMessage(node1.getBaseNode(), "ack message", null, node2.getBaseNode());
         ackMessage.buildLink(node1.getBaseNode(), node2.getBaseNode());
         var link = ackMessage.getLink();
         assertNotNull(link);

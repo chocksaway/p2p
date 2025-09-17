@@ -9,14 +9,16 @@ import java.util.List;
 
 public class AckMessage implements Serializable {
     private final BaseNode destination;
+    private final BaseNode source;
     private final String message;
     private Link link;
     private List<BaseNode> path = new ArrayList<>();
 
-    public AckMessage(BaseNode destination, String message, List<BaseNode> path) {
+    public AckMessage(BaseNode destination, String message, List<BaseNode> path, BaseNode source) {
         this.destination = destination;
         this.message = message;
         this.path = path;
+        this.source = source;
         this.link = null;
     }
 
@@ -41,5 +43,9 @@ public class AckMessage implements Serializable {
 
     public List<BaseNode> getPath() {
         return this.path;
+    }
+
+    public BaseNode getSource() {
+        return this.source;
     }
 }

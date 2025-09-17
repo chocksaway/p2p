@@ -31,4 +31,9 @@ public class SimpleMessage implements Serializable {
     public void addToPath(BaseNode baseNode) {
         this.path.add(baseNode);
     }
+
+    @Override
+    public String toString() {
+        return String.format("SimpleMessage{destination='%s', message='%s', path=%s}", destination, message, path);
+    }
 }
