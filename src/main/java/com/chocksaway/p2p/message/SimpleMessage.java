@@ -1,5 +1,6 @@
 package com.chocksaway.p2p.message;
 
+import com.chocksaway.p2p.Link;
 import com.chocksaway.p2p.route.BaseNode;
 
 import java.io.Serializable;
@@ -30,6 +31,13 @@ public class SimpleMessage implements Serializable {
 
     public void addToPath(BaseNode baseNode) {
         this.path.add(baseNode);
+    }
+
+    public Link buildLink(BaseNode from, BaseNode to) {
+        var toNode = from.build();
+        var fromNode = to.build();
+
+        return new Link(fromNode, toNode);
     }
 
     @Override

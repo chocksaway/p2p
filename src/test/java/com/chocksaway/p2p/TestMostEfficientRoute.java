@@ -3,10 +3,15 @@ package com.chocksaway.p2p;
 import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.BaseNode;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TestMostEfficientRoute {
+    Logger logger = LoggerFactory.getLogger(TestMostEfficientRoute.class);
+
     @Test
     public void testSendAndReturnAckMessage() throws InterruptedException {
         var node1 = new Node("node1", 8011);
@@ -40,7 +45,19 @@ public class TestMostEfficientRoute {
 
         Thread.sleep(2000);
 
-        var pathsForNode4 = node1.getPath("node4");
+        var pathsForNode4 = node1.getShortestPath("node4");
         assertEquals(2, pathsForNode4.size());
+        assertTrue(pathsForNode4.stream().anyMatch(path -> "node1".equals(path.getName())));
+        assertTrue(pathsForNode4.stream().anyMatch(path -> "node2".equals(path.getName())));
+
+        logger.info("---- Sending another message to verify consistent routing ----");
+
+        node1.send(simpleMessage);
+        Thread.sleep(2000);
+        assertEquals(3, node1.getAckMessages());
+
+        assertEquals(2, node1.getRouter().getPaths().get("node4").size());
+
+
     }
 }

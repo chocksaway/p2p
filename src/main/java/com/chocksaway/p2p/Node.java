@@ -184,7 +184,7 @@ public final class Node implements Serializable {
         return this.baseNode;
     }
 
-    public List<List<BaseNode>> getPath(String destination) {
-        return this.router.getPaths().get(destination);
+    public List<BaseNode> getShortestPath(String destination) {
+        return this.router.getShortestPath(destination);
     }
 }
