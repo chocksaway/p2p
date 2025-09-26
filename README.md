@@ -1,6 +1,6 @@
-# P2P Node Project
+# Peer to Peer (P2P) Network Project
 
-A peer-to-peer (P2P) messaging system implemented inJava using Maven for build. 
+A peer-to-peer (P2P) messaging system implemented in Java using Maven for build. 
 
 Nodes can send and receive serializable messages over sockets.
 Ack messages are sent back to the sender after delivery of a message.
