@@ -3,14 +3,15 @@ package com.chocksaway.p2p;
 import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.BaseNode;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TestMostEfficientRoute {
-    Logger logger = LoggerFactory.getLogger(TestMostEfficientRoute.class);
+    private static final Logger logger = LogManager.getLogger(TestMostEfficientRoute.class);
 
     @Test
     public void testSendAndReturnAckMessage() throws InterruptedException {
@@ -57,7 +58,5 @@ public class TestMostEfficientRoute {
         assertEquals(3, node1.getAckMessages());
 
         assertEquals(2, node1.getRouter().getPaths().get("node4").size());
-
-
     }
 }
