@@ -1,6 +1,7 @@
 package com.chocksaway.p2p;
 
 import com.chocksaway.p2p.message.AckMessage;
+import com.chocksaway.p2p.message.RouterMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.BaseNode;
 import com.chocksaway.p2p.route.Router;
@@ -95,6 +96,7 @@ public final class Node implements Serializable {
             }
 
             switch (received) {
+                case RouterMessage routerMessage -> handleRouter(routerMessage);
                 case String message -> process(message);
                 case SimpleMessage simpleMessage -> process(simpleMessage);
                 case AckMessage ackMessage -> process(ackMessage);
@@ -105,6 +107,12 @@ public final class Node implements Serializable {
         } catch (IOException e) {
             logger.error("Error handling client connection: {}", e.getMessage());
         }
+    }
+
+    private void handleRouter(RouterMessage routerMessage ) {
+        logger.info("router message");
+        var ackMessage = new AckMessage(routerMessage.getBaseNode(), "Router Ack from " + this.router.getLink("node1") + this.name, new ArrayList<>(), this.getBaseNode());
+        router.sendDirect(ackMessage);
     }
 
 

@@ -60,6 +60,11 @@ public class Router  {
         }
     }
 
+    public void sendDirect(AckMessage message) {
+        var link = new Link(message.getSource().build(),  message.getDestination().build());
+        link.sendMessage(message);
+    }
+
     private boolean findLinkInPath(AckMessage message) {
         return message.getPath().stream()
                 .filter(each -> each.getName().equals(this.name))
@@ -79,6 +84,17 @@ public class Router  {
                     return false;
                 });
     }
+
+    public Link getLink(String linkName) {
+        for (Link link : links) {
+            if (link.to().getName().equals(linkName)) {
+                return link;
+            }
+        }
+        return null;
+    }
+
+
 
     public int getLinks() {
         return this.links.size();
