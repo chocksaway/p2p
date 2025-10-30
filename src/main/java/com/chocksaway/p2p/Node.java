@@ -4,6 +4,7 @@ import com.chocksaway.p2p.message.AckMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.BaseNode;
 import com.chocksaway.p2p.route.Router;
+import com.chocksaway.p2p.utils.NetworkUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -186,5 +187,9 @@ public final class Node implements Serializable {
 
     public List<BaseNode> getShortestPath(String destination) {
         return this.router.getShortestPath(destination);
+    }
+
+    public boolean connectToNode(Node node) {
+        return NetworkUtils.canConnect(node.hostname, node.port, 2000);
     }
 }
