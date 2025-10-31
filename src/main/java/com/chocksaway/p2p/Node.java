@@ -1,6 +1,7 @@
 package com.chocksaway.p2p;
 
 import com.chocksaway.p2p.message.AckMessage;
+import com.chocksaway.p2p.message.RouterAckMessage;
 import com.chocksaway.p2p.message.RouterMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
 import com.chocksaway.p2p.route.BaseNode;
@@ -96,6 +97,7 @@ public final class Node implements Serializable {
             }
 
             switch (received) {
+                case RouterAckMessage routerAckMessage -> process(routerAckMessage);
                 case RouterMessage routerMessage -> handleRouter(routerMessage);
                 case String message -> process(message);
                 case SimpleMessage simpleMessage -> process(simpleMessage);
@@ -110,11 +112,13 @@ public final class Node implements Serializable {
     }
 
     private void handleRouter(RouterMessage routerMessage ) {
+        RouterAckMessage routerAckMessage = new RouterAckMessage(routerMessage.getBaseNode());
         logger.info("router message");
-        var ackMessage = new AckMessage(routerMessage.getBaseNode(), "Router Ack from " + this.router.getLink("node1") + this.name, new ArrayList<>(), this.getBaseNode());
-        router.sendDirect(ackMessage);
-    }
 
+        var link = new Link(this.baseNode.build(), routerMessage.getBaseNode().build());
+        routerAckMessage.addLink(link);
+        router.sendDirect(routerAckMessage);
+    }
 
     private void process(String message) {
         addMessage(message);
@@ -149,7 +153,10 @@ public final class Node implements Serializable {
         }
     }
 
-
+    private void process(RouterAckMessage routerAckMessage) {
+        logger.info("[{}:{}] Received router ack message: {}", name, port, routerAckMessage.getLink());
+        this.router.addLink(routerAckMessage.getLink());
+    }
 
     public int getAckMessages() {
         return this.ackMessages.size();

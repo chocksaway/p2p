@@ -2,6 +2,7 @@ package com.chocksaway.p2p.route;
 
 import com.chocksaway.p2p.Link;
 import com.chocksaway.p2p.message.AckMessage;
+import com.chocksaway.p2p.message.RouterAckMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -60,8 +61,8 @@ public class Router  {
         }
     }
 
-    public void sendDirect(AckMessage message) {
-        var link = new Link(message.getSource().build(),  message.getDestination().build());
+    public void sendDirect(RouterAckMessage message) {
+        var link = message.getLink();
         link.sendMessage(message);
     }
 
@@ -84,17 +85,6 @@ public class Router  {
                     return false;
                 });
     }
-
-    public Link getLink(String linkName) {
-        for (Link link : links) {
-            if (link.to().getName().equals(linkName)) {
-                return link;
-            }
-        }
-        return null;
-    }
-
-
 
     public int getLinks() {
         return this.links.size();

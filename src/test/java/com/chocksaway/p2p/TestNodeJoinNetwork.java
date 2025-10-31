@@ -33,6 +33,6 @@ public class TestNodeJoinNetwork {
         var link21 = new Link(node2, node1);
         link21.sendMessage(routerMessage);
         Thread.sleep(2000);
-        assertEquals(1,node2.getRouter().getPaths().size());
+        assertEquals(1,node2.getRouter().getLinks());
     }
 }
