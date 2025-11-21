@@ -1,8 +1,9 @@
 package com.chocksaway.p2p.app.controller;
 
 import com.chocksaway.p2p.app.service.MessageService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.chocksaway.p2p.message.NodeLogMessage;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 @RestController
@@ -13,8 +14,15 @@ public class MessageController {
         this.messageService = messageService;
     }
 
-    @GetMapping("/messages/receive")
+    @GetMapping(value = "/messages/receive", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> receiveMessages() {
         return messageService.receive();
     }
+
+    @PostMapping(value = "/messages/send", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void sendMessage(@RequestBody NodeLogMessage message) {
+        messageService.publish(message);
+    }
 }
+
+

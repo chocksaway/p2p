@@ -1,9 +1,6 @@
 package com.chocksaway.p2p;
 
-import com.chocksaway.p2p.message.AckMessage;
-import com.chocksaway.p2p.message.RouterAckMessage;
-import com.chocksaway.p2p.message.RouterMessage;
-import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.message.*;
 import com.chocksaway.p2p.route.BaseNode;
 import com.chocksaway.p2p.route.Router;
 import com.chocksaway.p2p.utils.NetworkUtils;
@@ -128,6 +125,9 @@ public final class Node implements Serializable {
     private void process(SimpleMessage simpleMessage) {
         if (simpleMessage.getDestination().equals(this.name)) {
             logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
+
+            sendMessageWrapper("Received message for self");
+
             addMessage(simpleMessage.getMessage());
             // Send an acknowledgment back to the sender
             var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath(), this.getBaseNode());
@@ -186,6 +186,13 @@ public final class Node implements Serializable {
             this.router = new Router(this.name);
         }
         this.router.send(message);
+    }
+
+    private void sendMessageWrapper(String message) {
+        logger.info("Send message wrapper");
+        var sendMessage = new SendMessage();
+        var nodeLogMessage = new NodeLogMessage(this.name, message);
+        sendMessage.send(nodeLogMessage);
     }
 
     public Router getRouter() {
