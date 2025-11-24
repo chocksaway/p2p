@@ -6,4 +6,5 @@ import reactor.core.publisher.Flux;
 public interface MessageService {
     Flux<String> receive();
     void publish(NodeLogMessage nodeLogMessage);
+    String clear();
 }

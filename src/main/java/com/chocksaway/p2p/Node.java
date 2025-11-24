@@ -25,6 +25,7 @@ public final class Node implements Serializable {
     private final List<String> messages;
     private final List<String> ackMessages = new ArrayList<>();
     private transient Router router;
+    private transient SendMessage sendMessage;
 
     private volatile boolean running = false;
 
@@ -39,6 +40,7 @@ public final class Node implements Serializable {
         this.baseNode = new BaseNode(this.hostname, this.name, this.port);
         this.messages = new ArrayList<>();
         this.router = new Router(this.name);
+        this.sendMessage = new SendMessage();
     }
 
     private void addMessage(String message) {
@@ -68,6 +70,7 @@ public final class Node implements Serializable {
     }
 
     public void start() {
+        sendMessage.logAndSend(this.name, "Node {} starting", this.name);
         logger.info("Starting: {}", this.name);
         new Thread(this::runServer).start();
     }
@@ -111,6 +114,7 @@ public final class Node implements Serializable {
     private void handleRouter(RouterMessage routerMessage ) {
         RouterAckMessage routerAckMessage = new RouterAckMessage(routerMessage.getBaseNode());
         logger.info("router message");
+        sendMessage.logAndSend(this.name, "router message");
 
         var link = new Link(this.baseNode.build(), routerMessage.getBaseNode().build());
         routerAckMessage.addLink(link);
@@ -120,13 +124,13 @@ public final class Node implements Serializable {
     private void process(String message) {
         addMessage(message);
         logger.info("[{}:{}] Received: {}", name, port, message);
+        sendMessage.logAndSend(this.name, "[{}:{}] Received: {}", name, Integer.toString(port), message);
     }
 
     private void process(SimpleMessage simpleMessage) {
         if (simpleMessage.getDestination().equals(this.name)) {
             logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
-
-            sendMessageWrapper("Received message for self");
+            sendMessage.logAndSend(this.name, "[{}:{}] Received message for self: {}{}", name, Integer.toString(port), simpleMessage.getMessage(), simpleMessage.getPath().toString());
 
             addMessage(simpleMessage.getMessage());
             // Send an acknowledgment back to the sender
@@ -135,6 +139,9 @@ public final class Node implements Serializable {
             router.send(ackMessage);
         } else {
             logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
+            sendMessage.logAndSend(this.name, "[{}:{}] Forwarding message to: {}", name, Integer.toString(port), simpleMessage.getDestination());
+
+
             simpleMessage.addToPath(this.baseNode);
             router.send(simpleMessage);
         }
@@ -142,19 +149,24 @@ public final class Node implements Serializable {
 
     private void process(AckMessage ackMessage) {
         logger.info("[{}:{}] Received ack message: {}", name, port, ackMessage.getMessage());
+        sendMessage.logAndSend(this.name, "[{}:{}] Received ack message: {}", name, Integer.toString(port), ackMessage.getMessage());
+
 
         if (ackMessage.getDestination().getName().equals(this.name)) {
             logger.info("[{}:{}] Ack is for self: {}", name, port, ackMessage.getMessage());
+            sendMessage.logAndSend(this.name, "[{}:{}] Ack is for self: {}", name, Integer.toString(port), ackMessage.getMessage());
             this.ackMessages.add(ackMessage.getMessage());
             this.router.storePath(ackMessage.getPath(), ackMessage.getSource());
         } else {
             logger.info("[{}:{}] Forwarding ack to: {}", name, port, ackMessage.getDestination());
+            sendMessage.logAndSend(this.name, "[{}:{}] Forwarding ack to: {}", name, Integer.toString(port), ackMessage.getDestination().toString());
             router.send(ackMessage);
         }
     }
 
     private void process(RouterAckMessage routerAckMessage) {
         logger.info("[{}:{}] Received router ack message: {}", name, port, routerAckMessage.getLink());
+        sendMessage.logAndSend(this.name, "[{}:{}] Received router ack message: {}", name, Integer.toString(port), routerAckMessage.getLink().toString());
         this.router.addLink(routerAckMessage.getLink());
     }
 
@@ -186,13 +198,6 @@ public final class Node implements Serializable {
             this.router = new Router(this.name);
         }
         this.router.send(message);
-    }
-
-    private void sendMessageWrapper(String message) {
-        logger.info("Send message wrapper");
-        var sendMessage = new SendMessage();
-        var nodeLogMessage = new NodeLogMessage(this.name, message);
-        sendMessage.send(nodeLogMessage);
     }
 
     public Router getRouter() {

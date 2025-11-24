@@ -19,10 +19,17 @@ public class MessageController {
         return messageService.receive();
     }
 
+    @GetMapping(value = "/messages/clear", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public String clearMessages() {
+        return messageService.clear();
+    }
+
     @PostMapping(value = "/messages/send", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void sendMessage(@RequestBody NodeLogMessage message) {
         messageService.publish(message);
     }
+
+
 }
 
 
