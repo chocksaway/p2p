@@ -89,7 +89,13 @@ The complete log output is here:
 
 ## Requirements
 
-- Java 17+
+- Java 22
 - Maven 3.6+
 
+## Messaging functionality
 
+I've always been fascinated by messaging systems, and wanted to use the P2P logs as a messaging source.
+A MessageController has been implemented with _/messages/send_ and _/messages/receive_ endpoints.  A Node logs (in the normal way), and also sends to the /messages/send endpoint.
+
+_curl_ is used to listen to messages: 
+```% curl --http1.1 --no-buffer --max-time 0 -H "Accept: text/event-stream" http://localhost:8080/messages/receive```
