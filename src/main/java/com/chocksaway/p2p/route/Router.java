@@ -1,6 +1,6 @@
 package com.chocksaway.p2p.route;
 
-import com.chocksaway.p2p.Link;
+import com.chocksaway.p2p.ILink;
 import com.chocksaway.p2p.message.AckMessage;
 import com.chocksaway.p2p.message.RouterAckMessage;
 import com.chocksaway.p2p.message.SimpleMessage;
@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Router  {
+public class Router implements IRouter  {
     private final String name;
-    private final List<Link> links = new ArrayList<>();
+    private final List<ILink> links = new ArrayList<>();
 
     private final Map<String, List<List<BaseNode>>> paths;
 
@@ -26,7 +26,7 @@ public class Router  {
         this.paths = new HashMap<>();
     }
 
-    public void addLink(Link link) {
+    public void addLink(ILink link) {
         if (link.from() == null || link.to() == null) {
             throw new NullPointerException("Source or destination is null");
         }
@@ -42,7 +42,7 @@ public class Router  {
             var link = message.buildLink(to, from);
             link.sendMessage(message);
         } else {
-            for (Link link : links) {
+            for (ILink link : links) {
                 link.sendMessage(message);
             }
         }

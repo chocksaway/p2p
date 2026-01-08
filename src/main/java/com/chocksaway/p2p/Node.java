@@ -2,6 +2,7 @@ package com.chocksaway.p2p;
 
 import com.chocksaway.p2p.message.*;
 import com.chocksaway.p2p.route.BaseNode;
+import com.chocksaway.p2p.route.IRouter;
 import com.chocksaway.p2p.route.Router;
 import com.chocksaway.p2p.utils.NetworkUtils;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Node implements Serializable {
+public final class Node implements INode, Serializable {
     private final String hostname;
     private final String name;
     private final int port;
@@ -200,7 +201,7 @@ public final class Node implements Serializable {
         this.router.send(message);
     }
 
-    public Router getRouter() {
+    public IRouter getRouter() {
         return this.router;
     }
 

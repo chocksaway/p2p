@@ -9,12 +9,12 @@ import java.io.Serializable;
 import java.net.Socket;
 import java.util.Objects;
 
-public final class Link implements Serializable {
+public final class Link implements ILink, Serializable {
     private static final Logger logger = LogManager.getLogger(Link.class);
-    private final Node from;
-    private final Node to;
+    private final INode from;
+    private final INode to;
 
-    public Link(Node from, Node to) {
+    public Link(INode from, INode to) {
         this.from = from;
         this.to = to;
     }
@@ -33,11 +33,11 @@ public final class Link implements Serializable {
         }
     }
 
-    public Node from() {
+    public INode from() {
         return from;
     }
 
-    public Node to() {
+    public INode to() {
         return to;
     }
 
