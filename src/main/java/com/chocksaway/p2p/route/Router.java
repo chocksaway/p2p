@@ -3,7 +3,7 @@ package com.chocksaway.p2p.route;
 import com.chocksaway.p2p.ILink;
 import com.chocksaway.p2p.message.AckMessage;
 import com.chocksaway.p2p.message.RouterAckMessage;
-import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.message.Message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +33,7 @@ public class Router implements IRouter  {
         links.add(link);
     }
 
-    public void send(SimpleMessage message) {
+    public void send(Message message) {
         var path = getShortestPath(message.getDestination());
 
         if (!path.isEmpty()) {

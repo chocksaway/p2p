@@ -1,6 +1,6 @@
 package com.chocksaway.p2p.app.service;
 
-import com.chocksaway.p2p.message.NodeLogMessage;
+import com.chocksaway.p2p.message.log.LogMessage;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -20,9 +20,9 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void publish(NodeLogMessage nodeLogMessage) {
+    public void publish(LogMessage logMessage) {
         String formatted = String.format("%s [%s]: %s", Instant.now().toString(),
-                nodeLogMessage.nodeId(), nodeLogMessage.message());
+                logMessage.nodeId(), logMessage.message());
         sinkRef.get().tryEmitNext(formatted);
     }
 

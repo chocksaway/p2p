@@ -1,5 +1,6 @@
 package com.chocksaway.p2p.message;
 
+import com.chocksaway.p2p.message.log.LogMessage;
 import com.chocksaway.p2p.utils.FormatMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,9 +23,9 @@ public class SendMessage {
 
     private void send(String nodeId, String message) {
         String jsonPayload = "";
-        NodeLogMessage nodeLogMessage = new NodeLogMessage(nodeId, message);
+        LogMessage logMessage = new LogMessage(nodeId, message);
         try {
-            jsonPayload = objectMapper.writeValueAsString(nodeLogMessage);
+            jsonPayload = objectMapper.writeValueAsString(logMessage);
         } catch (JsonProcessingException ex) {
             logger.error(ex.getMessage());
         }

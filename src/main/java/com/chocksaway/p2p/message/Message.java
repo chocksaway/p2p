@@ -1,13 +1,12 @@
 package com.chocksaway.p2p.message;
 
-import com.chocksaway.p2p.Link;
 import com.chocksaway.p2p.route.BaseNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SimpleMessage implements Serializable {
+public class Message implements IMessage, Serializable {
     private final String destination;
     private final String message;
     private final List<BaseNode> path = new ArrayList<>();
@@ -16,7 +15,7 @@ public class SimpleMessage implements Serializable {
         return this.path;
     }
 
-    public SimpleMessage(String destination, String message) {
+    public Message(String destination, String message) {
         this.destination = destination;
         this.message = message;
     }
@@ -33,15 +32,8 @@ public class SimpleMessage implements Serializable {
         this.path.add(baseNode);
     }
 
-    public Link buildLink(BaseNode from, BaseNode to) {
-        var toNode = from.build();
-        var fromNode = to.build();
-
-        return new Link(fromNode, toNode);
-    }
-
     @Override
     public String toString() {
-        return String.format("SimpleMessage{destination='%s', message='%s', path=%s}", destination, message, path);
+        return String.format("Message{destination='%s', message='%s', path=%s}", destination, message, path);
     }
 }

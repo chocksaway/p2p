@@ -1,6 +1,6 @@
 package com.chocksaway.p2p;
 
-import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.message.Message;
 import com.chocksaway.p2p.route.BaseNode;
 import org.junit.Test;
 
@@ -33,10 +33,10 @@ public class TestSimpleMessageSendAndAckResponse {
         link34.addToFromRouter();
         link54.addToFromRouter();
 
-        var message = "Hello, Node 4!";
-        var simpleMessage = new SimpleMessage("node4", message);
-        simpleMessage.addToPath(new BaseNode(node1.getName(), node1.getName(), node1.getPort()));
-        node1.send(simpleMessage);
+        var content = "Hello, Node 4!";
+        var message = new Message("node4", content);
+        message.addToPath(new BaseNode(node1.getName(), node1.getName(), node1.getPort()));
+        node1.send(message);
 
         Thread.sleep(2000);
 

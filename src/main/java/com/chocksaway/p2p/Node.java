@@ -101,7 +101,7 @@ public final class Node implements INode, Serializable {
                 case RouterAckMessage routerAckMessage -> process(routerAckMessage);
                 case RouterMessage routerMessage -> handleRouter(routerMessage);
                 case String message -> process(message);
-                case SimpleMessage simpleMessage -> process(simpleMessage);
+                case Message message -> process(message);
                 case AckMessage ackMessage -> process(ackMessage);
                 case null -> logger.warn("[{}:{}] Received null object", name, port);
                 default ->
@@ -113,12 +113,15 @@ public final class Node implements INode, Serializable {
     }
 
     private void handleRouter(RouterMessage routerMessage ) {
-        RouterAckMessage routerAckMessage = new RouterAckMessage(routerMessage.getBaseNode());
+        RouterAckMessage routerAckMessage = new RouterAckMessage();
         logger.info("router message");
         sendMessage.logAndSend(this.name, "router message");
 
-        var link = new Link(this.baseNode.build(), routerMessage.getBaseNode().build());
-        routerAckMessage.addLink(link);
+
+
+        var link = routerAckMessage.buildLink(this.baseNode.build().getBaseNode(),
+                routerMessage.getBaseNode().build().getBaseNode());
+        routerAckMessage.setLink(link);
         router.sendDirect(routerAckMessage);
     }
 
@@ -128,23 +131,23 @@ public final class Node implements INode, Serializable {
         sendMessage.logAndSend(this.name, "[{}:{}] Received: {}", name, Integer.toString(port), message);
     }
 
-    private void process(SimpleMessage simpleMessage) {
-        if (simpleMessage.getDestination().equals(this.name)) {
-            logger.info("[{}:{}] Received message for self: {}{}", name, port, simpleMessage.getMessage(), simpleMessage.getPath());
-            sendMessage.logAndSend(this.name, "[{}:{}] Received message for self: {}{}", name, Integer.toString(port), simpleMessage.getMessage(), simpleMessage.getPath().toString());
+    private void process(Message message) {
+        if (message.getDestination().equals(this.name)) {
+            logger.info("[{}:{}] Received message for self: {}{}", name, port, message.getMessage(), message.getPath());
+            sendMessage.logAndSend(this.name, "[{}:{}] Received message for self: {}{}", name, Integer.toString(port), message.getMessage(), message.getPath().toString());
 
-            addMessage(simpleMessage.getMessage());
+            addMessage(message.getMessage());
             // Send an acknowledgment back to the sender
-            var ackMessage = new AckMessage(simpleMessage.getPath().getFirst(), "Ack from " + this.name, simpleMessage.getPath(), this.getBaseNode());
-            ackMessage.buildLink(simpleMessage.getPath().getLast(), this.baseNode);
+            var ackMessage = new AckMessage(message.getPath().getFirst(), "Ack from " + this.name, message.getPath(), this.getBaseNode());
+            ackMessage.buildLink(message.getPath().getLast(), this.baseNode);
             router.send(ackMessage);
         } else {
-            logger.info("[{}:{}] Forwarding message to: {}", name, port, simpleMessage.getDestination());
-            sendMessage.logAndSend(this.name, "[{}:{}] Forwarding message to: {}", name, Integer.toString(port), simpleMessage.getDestination());
+            logger.info("[{}:{}] Forwarding message to: {}", name, port, message.getDestination());
+            sendMessage.logAndSend(this.name, "[{}:{}] Forwarding message to: {}", name, Integer.toString(port), message.getDestination());
 
 
-            simpleMessage.addToPath(this.baseNode);
-            router.send(simpleMessage);
+            message.addToPath(this.baseNode);
+            router.send(message);
         }
     }
 
@@ -194,7 +197,7 @@ public final class Node implements INode, Serializable {
         }
     }
 
-    public void send(SimpleMessage message) {
+    public void send(Message message) {
         if (this.router == null) {
             this.router = new Router(this.name);
         }

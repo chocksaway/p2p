@@ -1,6 +1,7 @@
 package com.chocksaway.p2p;
 
-import com.chocksaway.p2p.message.SimpleMessage;
+import com.chocksaway.p2p.message.Message;
+
 import com.chocksaway.p2p.route.BaseNode;
 import org.junit.Test;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,7 @@ public class TestMostEfficientRoute {
         link54.addToFromRouter();
 
         var message = "Hello, Node 4!";
-        var simpleMessage = new SimpleMessage("node4", message);
+        var simpleMessage = new Message("node4", message);
         simpleMessage.addToPath(new BaseNode(node1.getName(), node1.getName(), node1.getPort()));
         node1.send(simpleMessage);
 
